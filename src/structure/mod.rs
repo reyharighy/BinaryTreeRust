@@ -5,7 +5,7 @@ pub mod tree {
     pub type NodeLink = Rc<RefCell<Node>>;
     pub type WeakNodeLink = Weak<RefCell<Node>>;
 
-    #[derive(Clone)]
+    #[derive(Debug, Clone)]
     pub struct Node {
         pub value: i32,
         pub parent: Option<Weak<RefCell<Node>>>,
@@ -185,7 +185,7 @@ pub mod tree {
          */
         pub fn discard_node_by_value(&mut self, value: i32) -> bool {
             //check current node value
-            if (self.value == value) {
+            if  self.value == value{
                 //cut off parent connection
                 self.parent = None;
                 return true;
@@ -244,7 +244,7 @@ pub mod tree {
                 right_depth = self.track_depth(right_child, depth);
             }
 
-            if (left_depth > right_depth) {
+            if left_depth > right_depth {
                 return left_depth;
             }
 

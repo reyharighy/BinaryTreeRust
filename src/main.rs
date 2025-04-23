@@ -5,7 +5,6 @@ use crate::structure::tree::Node;
 use crate::structure::tree::NodeLink;
 use crate::tool::generate_dotfile;
 
-
 fn main() {
     //create the nodelink of the root node
     let rootlink: NodeLink = Node::new_nodelink(5);
@@ -14,6 +13,8 @@ fn main() {
     rootlink.borrow_mut().add_left_child(&rootlink, 3);
     //add a new right node value
     rootlink.borrow_mut().add_right_child(&rootlink, 7);
+
+    //println!("{:?}", rootlink);
 
     //print the tree at this time
     let mut main_tree_path = "prime.dot";
