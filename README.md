@@ -6,4 +6,9 @@ Core binary tree structure has been completed on structure module.
 
 The helper function to print the output of binary tree to dot graphviz notation also been completed.
 
-Both untested however, from the main file. The logic should be completed regardless.
+Tested functions:
+- add\_left\_child
+- add\_right\_child
+- tree\_depth
+- count\_nodes
+- count\_nodes\_by\_nodelink
