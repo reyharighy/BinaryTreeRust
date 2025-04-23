@@ -27,22 +27,23 @@ fn main() {
         left_tree_extract.borrow_mut().add_right_child(left_tree_extract, 4);
     }
 
-    //print the tree again, now been added with more values
-    main_tree_path = "prime_t2.dot";
-    generate_dotfile(&rootlink, main_tree_path);
-
     //add new child values to the right subtree
     let right_subtree = &rootlink.borrow().right;
     if let Some(right_tree_extract) = right_subtree{
         right_tree_extract.borrow_mut().add_right_child(right_tree_extract, 10);
     }
 
+    //print the tree again, now been added with more values
+    main_tree_path = "prime_t2.dot";
+    generate_dotfile(&rootlink, main_tree_path);
+
     //Call tree depth function at this time
     let recorded_depth = rootlink.borrow().tree_depth();
     println!("Current tree depth: {0}", recorded_depth);
 
     //Call count_nodes function
-    //TODO
+    let total_nodes = rootlink.borrow().count_nodes();
+    println!("Amount of nodes in current tree: {0}", total_nodes);
 
     //Call count_nodes_by_nodelink function, supplied right subtree as parameter
     //TODO

@@ -204,25 +204,26 @@ pub mod tree {
 
         /**
          * Count the amount of nodes in the whole subtree, in the current node
-         * assume when enter the function the current node isn't 0
+         * assume when enter the function the current node isn't a null
          */
         pub fn count_nodes(&self) -> i32 {
-            let mut node_count = 1;
+            let mut count = 0;
             let nodelink: Rc<RefCell<Node>> = Node::new_from_node(self.clone());
-            Node::count_nodes_by_nodelink(&nodelink, &mut node_count);
-            return node_count;
+            count = Node::count_nodes_by_nodelink(&nodelink, count);
+            return count;
         }
 
         //the same as above except start the count from nodelink reference parameter
-        pub fn count_nodes_by_nodelink(node: &NodeLink, count: &mut i32) -> i32 {
-            *count += 1;
+        pub fn count_nodes_by_nodelink(node: &NodeLink, count: i32) -> i32 {
+            let mut left_count: i32 = 0;
+            let mut right_count: i32 = 0;
             if let Some(left_child) = &node.borrow().left {
-                *count += Node::count_nodes_by_nodelink(&left_child, count);
+                left_count = Node::count_nodes_by_nodelink(&left_child, count);
             }
             if let Some(right_child) = &node.borrow().right {
-                *count += Node::count_nodes_by_nodelink(&right_child, count);
+                right_count = Node::count_nodes_by_nodelink(&right_child, count);
             }
-            return *count;
+            return count + left_count + right_count + 1;
         }
 
         /**Count depth of the tree in the current node
