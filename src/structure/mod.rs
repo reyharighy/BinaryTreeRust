@@ -225,23 +225,25 @@ pub mod tree {
             return *count;
         }
 
-        //Count depth of the tree in the current node
+        /**Count depth of the tree in the current node
+         * Count from root is started from 0
+         */
         pub fn tree_depth(&self) -> i32 {
             let depth: i32 = 0;
             let nodelink: Rc<RefCell<Node>> = Node::new_from_node(self.clone());
-            return self.track_depth(nodelink, depth);
+            return self.track_depth(&nodelink, depth);
         }
 
         //track depth by traversing all nodes but returned depth count per path. The highest number will be returned
-        fn track_depth(&self, node: NodeLink, depth: i32) -> i32 {
-            let mut left_depth: i32 = depth + 1;
-            let mut right_depth: i32 = depth + 1;
-            if let Some(left_child) = self.left.clone() {
-                left_depth = self.track_depth(left_child, depth);
+        fn track_depth(&self, node: &NodeLink, depth: i32) -> i32 {
+            let mut left_depth: i32 = 0;
+            let mut right_depth: i32 = 0;
+            if let Some(left_child) = &node.borrow().left {
+                left_depth = self.track_depth(left_child, depth) + 1;
             }
 
-            if let Some(right_child) = self.right.clone() {
-                right_depth = self.track_depth(right_child, depth);
+            if let Some(right_child) = &node.borrow().right {
+                right_depth = self.track_depth(right_child, depth) + 1;
             }
 
             if left_depth > right_depth {
