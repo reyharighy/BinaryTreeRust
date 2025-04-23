@@ -47,6 +47,8 @@ fn main() {
 
     //Call count_nodes_by_nodelink function, supplied right subtree as parameter
     //TODO
+    let subtree_count = Node::count_nodes_by_nodelink(&right_subtree.clone().unwrap(), 0);
+    println!("Amount of nodes in current subtree: {0}", subtree_count);
 
     //Get the sibling of the leftsubtree from parent
     //TODO
@@ -61,7 +63,7 @@ fn main() {
     //TODO
 
     //print the tree again
-    main_tree_path = "prime_t3";
+    main_tree_path = "prime_t3.dot";
     generate_dotfile(&rootlink, main_tree_path);
 
     //Call tree depth function at this time
@@ -71,7 +73,7 @@ fn main() {
     //TODO
 
     //print the tree again
-    main_tree_path = "prime_t4";
+    main_tree_path = "prime_t4.dot";
     generate_dotfile(&rootlink, main_tree_path);
 }
 
