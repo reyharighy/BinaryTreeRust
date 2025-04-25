@@ -52,11 +52,11 @@ fn main() {
 
     //Get the sibling of the leftsubtree from parent
     let left_subtree_sibling = Node::get_sibling(&left_subtree.as_ref().unwrap());
-    println!("sibling of left subtree {:?}", left_subtree_sibling);
+    //println!("sibling of left subtree {:?}", left_subtree_sibling);
     
     //get the left subtree by value
-    //TODO
-
+    let left_subtree = rootlink.borrow().get_node_by_value(3);
+    println!("left subtree seek by value{:?}", left_subtree);
     //get the left subtree by full properties
     //TODO
 
@@ -65,7 +65,7 @@ fn main() {
 
     //print the tree again
     main_tree_path = "prime_t3.dot";
-    generate_dotfile(&rootlink, main_tree_path);
+    generate_dotfile(&left_subtree.unwrap(), main_tree_path);
 
     //Call tree depth function at this time
     //TODO

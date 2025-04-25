@@ -78,13 +78,13 @@ pub mod tree {
          * This function will return the node that match value
          * Let's assume the tree won't have any value duplicates
          */
-        pub fn get_node_by_value(&self, value: i32) -> Option<WeakNodeLink> {
+        pub fn get_node_by_value(&self, value: i32) -> Option<NodeLink> {
             //check current node value
             if self.value == value {
                 //create clone of NodeLink
                 let node = self.clone();
                 let nodelink = Rc::new(RefCell::new(node));
-                return Some(Rc::<RefCell<Node>>::downgrade(&nodelink));
+                return Rc::<RefCell<Node>>::downgrade(&nodelink).upgrade();
             }
             //go left if exist
             if let Some(x) = &self.left {
