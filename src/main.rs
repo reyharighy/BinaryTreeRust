@@ -51,8 +51,9 @@ fn main() {
     println!("Amount of nodes in current subtree: {0}", subtree_count);
 
     //Get the sibling of the leftsubtree from parent
-    //TODO
-
+    let left_subtree_sibling = Node::get_sibling(&left_subtree.as_ref().unwrap());
+    println!("sibling of left subtree {:?}", left_subtree_sibling);
+    
     //get the left subtree by value
     //TODO
 

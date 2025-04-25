@@ -273,10 +273,10 @@ pub mod tree {
                         .is_some_and(|x| x.borrow().value == nodelink.borrow().value)
                     {
                         //return the right node
-                        return sparent.borrow_mut().right.clone();
+                        return sparent.clone().borrow().right.clone();
                     } else {
                         //means we're obviously coming from the right since this block is entered
-                        return sparent.borrow_mut().left.clone();
+                        return sparent.clone().borrow().left.clone();
                     }
                 }
             }
