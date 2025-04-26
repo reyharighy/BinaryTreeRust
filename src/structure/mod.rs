@@ -1,5 +1,6 @@
 pub mod tree {
     use std::cell::RefCell;
+    use std::ops::Deref;
     use std::rc::{Rc, Weak};
 
     pub type NodeLink = Rc<RefCell<Node>>;
@@ -75,28 +76,6 @@ pub mod tree {
         }
 
         /**
-         * This function will return the node that match value
-         * Let's assume the tree won't have any value duplicates
-         */
-        pub fn get_node_by_value(&self, value: i32) -> Option<NodeLink> {
-            //check current node value
-            if self.value == value {
-                //create clone of NodeLink
-                let node = self.clone();
-                let nodelink = Rc::new(RefCell::new(node));
-                return Rc::<RefCell<Node>>::downgrade(&nodelink).upgrade();
-            }
-            //go left if exist
-            if let Some(x) = &self.left {
-                return x.borrow().get_node_by_value(value);
-            }
-            if let Some(x) = &self.right {
-                return x.borrow().get_node_by_value(value);
-            }
-            return None;
-        }
-
-        /**
          * As the name implied, used to upgrade parent node to strong nodelink
          */
         pub fn upgrade_weak_to_strong(node: Option<WeakNodeLink>) -> Option<NodeLink> {
@@ -145,34 +124,65 @@ pub mod tree {
         }
 
         /**
+         * This function will return the node that match value
+         * Let's assume the tree won't have any value duplicates
+         */
+        pub fn get_node_by_value(&self, value: i32) -> Option<NodeLink>{
+            //check current node value
+            if self.value == value {
+                //create clone of NodeLink
+                let node = self.clone();
+                let nodelink = Rc::new(RefCell::new(node));
+                return Rc::<RefCell<Node>>::downgrade(&nodelink).upgrade();
+            }
+            //go left if exist
+            if let Some(x) = &self.left {
+                return x.borrow().get_node_by_value(value);
+            }
+            if let Some(x) = &self.right {
+                return x.borrow().get_node_by_value(value);
+            }
+            return None;
+        }
+
+        /**
          * This function will return the node that matches all Nodelink Properties:
          * 1). current node value,
          * 2). node parent value,
          * 3). both child values
          * Let's assume the tree won't have any value duplicates
+         * Asssume 2nd parameter is not None
          */
-        pub fn get_node_by_full_property(&self, node: &NodeLink) -> Option<NodeLink> {
+        pub fn get_node_by_full_property(root_node: &NodeLink, node: &NodeLink) -> Option<NodeLink> {
             //check current node value
             let nodevalue = node.borrow().value;
-            let selfclone = self.get_nodelink_copy();
             let check_parent_eq = Node::is_node_match_both_weak(
                 node.borrow().parent.clone(),
-                selfclone.borrow().parent.clone(),
+                root_node.borrow().parent.clone(),
             );
             let check_left_child_eq = Node::is_node_match_both_strong(
                 node.borrow().left.clone(),
-                selfclone.borrow().left.clone(),
+                root_node.borrow().left.clone(),
             );
             let check_right_child_eq = Node::is_node_match_both_strong(
                 node.borrow().right.clone(),
-                selfclone.borrow().right.clone(),
+                root_node.borrow().right.clone(),
             );
-            if self.value == nodevalue
+            if root_node.borrow().value == nodevalue
                 && check_parent_eq
                 && check_left_child_eq
                 && check_right_child_eq
             {
-                return Some(selfclone);
+                return Some(root_node.clone());
+            } else{
+                //recurse deeper if not found
+                //recurse to left
+                if let Some(left_subtree) = root_node.borrow().left.as_ref(){
+                    return Node::get_node_by_full_property(left_subtree, node);
+                } else if let Some(right_subtree) = root_node.borrow().right.as_ref(){
+                    //recurse to right
+                    return Node::get_node_by_full_property(right_subtree, node);
+                }
             }
             None
         }

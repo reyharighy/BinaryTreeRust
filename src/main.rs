@@ -53,12 +53,13 @@ fn main() {
     //Get the sibling of the leftsubtree from parent
     let left_subtree_sibling = Node::get_sibling(&left_subtree.as_ref().unwrap());
     //println!("sibling of left subtree {:?}", left_subtree_sibling);
-    
+
     //get the left subtree by value
     let left_subtree = rootlink.borrow().get_node_by_value(3);
-    println!("left subtree seek by value{:?}", left_subtree);
+    println!("left subtree seek by value {:?}", left_subtree);
     //get the left subtree by full properties
-    //TODO
+    let another_left_subtree = Node::get_node_by_full_property(&rootlink, &left_subtree.as_ref().unwrap());
+    println!("left subtree seek by full property {:?}", another_left_subtree);
 
     //Discard the right subtree from parent
     //TODO
@@ -70,7 +71,7 @@ fn main() {
     //Call tree depth function at this time
     //TODO
 
-    //Call count_nodes function 
+    //Call count_nodes function
     //TODO
 
     //print the tree again
