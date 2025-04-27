@@ -51,22 +51,26 @@ fn main() {
     println!("Amount of nodes in current subtree: {0}", subtree_count);
 
     //Get the sibling of the leftsubtree from parent
-    let left_subtree_sibling = Node::get_sibling(&left_subtree.as_ref().unwrap());
+    let _left_subtree_sibling = Node::get_sibling(&left_subtree.as_ref().unwrap());
     //println!("sibling of left subtree {:?}", left_subtree_sibling);
 
     //get the left subtree by value
     let left_subtree = rootlink.borrow().get_node_by_value(3);
     println!("left subtree seek by value {:?}", left_subtree);
     //get the left subtree by full properties
-    let another_left_subtree = Node::get_node_by_full_property(&rootlink, &left_subtree.as_ref().unwrap());
+    let another_left_subtree = rootlink.borrow().get_node_by_full_property(&left_subtree.as_ref().unwrap());
     println!("left subtree seek by full property {:?}", another_left_subtree);
 
     //Discard the right subtree from parent
-    //TODO
+    let rootlink2 = rootlink.borrow().get_nodelink_copy();
+
+    let flag = rootlink2.borrow_mut().discard_node_by_value(3);
+    println!("status of node deletion: {0}", flag);
+
 
     //print the tree again
     main_tree_path = "prime_t3.dot";
-    generate_dotfile(&left_subtree.unwrap(), main_tree_path);
+    generate_dotfile(&rootlink2, main_tree_path);
 
     //Call tree depth function at this time
     //TODO
