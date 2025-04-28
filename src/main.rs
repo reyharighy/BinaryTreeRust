@@ -4,6 +4,7 @@ mod tool;
 use crate::structure::tree::Node;
 use crate::structure::tree::NodeLink;
 use crate::tool::generate_dotfile;
+use crate::structure::bst::BstNode;
 
 fn main() {
     //create the nodelink of the root node
@@ -74,9 +75,12 @@ fn main() {
 
     //Call tree depth function at this time
     //TODO
+    let depth_now = rootlink2.borrow().tree_depth();
+    println!("Depth after discard {0}",depth_now);
 
     //Call count_nodes function
-    //TODO
+    let count_now = rootlink2.borrow().count_nodes();
+    println!("Count nodes after discard {0}",count_now);
 
     //print the tree again
     main_tree_path = "prime_t4.dot";
