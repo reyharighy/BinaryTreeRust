@@ -7,10 +7,10 @@ pub type WeakBstNodeLink = Weak<RefCell<BstNode>>;
 //this package implement BST wrapper
 #[derive(Debug, Clone)]
 pub struct BstNode {
-    key: Option<i32>,
-    parent: Option<WeakBstNodeLink>,
-    left: Option<BstNodeLink>,
-    right: Option<BstNodeLink>,
+    pub key: Option<i32>,
+    pub parent: Option<WeakBstNodeLink>,
+    pub left: Option<BstNodeLink>,
+    pub right: Option<BstNodeLink>,
 }
 
 impl BstNode {
@@ -74,7 +74,7 @@ impl BstNode {
                 return self.right.as_ref().unwrap().borrow().tree_search(value);
             }
         }
-        //default is current node is NIL
+        //default if current node is NIL
         None
     }
 
@@ -93,7 +93,7 @@ impl BstNode {
     pub fn maximum(&self) -> BstNodeLink {
         if self.key.is_some() {
             if let Some(right_node) = &self.right {
-                return right_node.borrow().minimum();
+                return right_node.borrow().maximum();
             }
         }
         self.get_bst_nodelink_copy()
@@ -102,7 +102,7 @@ impl BstNode {
     /**
      * Return the root of a node, return self if not exist
      */
-    fn get_root(node: &BstNodeLink) -> BstNodeLink {
+    pub fn get_root(node: &BstNodeLink) -> BstNodeLink {
         let parent = BstNode::upgrade_weak_to_strong(node.borrow().parent.clone());
         if parent.is_none() {
             return node.clone();
