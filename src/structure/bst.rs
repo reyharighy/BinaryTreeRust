@@ -63,12 +63,12 @@ impl BstNode {
     }
 
     //search the current tree which node fit the value
-    pub fn tree_search(&self, value: &i32) -> Option<BstNodeLink> {
+    pub fn tree_search(&self, value: i32) -> Option<BstNodeLink> {
         if let Some(key) = self.key {
-            if key == *value {
+            if key == value {
                 return Some(self.get_bst_nodelink_copy());
             }
-            if *value < key && self.left.is_some() {
+            if value < key && self.left.is_some() {
                 return self.left.as_ref().unwrap().borrow().tree_search(value);
             } else if self.right.is_some() {
                 return self.right.as_ref().unwrap().borrow().tree_search(value);
