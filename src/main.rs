@@ -10,7 +10,7 @@ use crate::tool::generate_dotfile_bst;
 
 fn main() {
     //turn on to test the old code
-    //test_binary_tree();
+    // test_binary_tree();
     test_binary_search_tree();
 }
 
@@ -51,9 +51,9 @@ fn test_binary_search_tree(){
         if let Some(second_right_subtree_link) = second_right_subtree{
             second_right_subtree_link.borrow_mut().add_right_child(second_right_subtree_link, 13);
 
-            let third_left_subtree = &second_right_subtree_link.borrow().left;
+            let third_left_subtree = &second_right_subtree_link.borrow().right;
             if let Some(third_left_subtree_link) = third_left_subtree{
-                third_left_subtree_link.borrow_mut().add_right_child(third_left_subtree_link, 9);
+                third_left_subtree_link.borrow_mut().add_left_child(third_left_subtree_link, 9);
             }
         }
     }
@@ -63,7 +63,7 @@ fn test_binary_search_tree(){
     generate_dotfile_bst(&rootlink, main_tree_path);
 
     //tree search test
-    let node_result = rootlink.borrow().tree_search(&3);
+    let node_result = rootlink.borrow().tree_search(9);
     println!("tree search result {:?}", node_result);
     //min test
     let min_node = rootlink.borrow().minimum();
@@ -87,6 +87,7 @@ fn test_binary_search_tree(){
 
 }
 
+#[allow(dead_code)]
 fn test_binary_tree() {
     //create the nodelink of the root node
     let rootlink: NodeLink = Node::new_nodelink(5);
