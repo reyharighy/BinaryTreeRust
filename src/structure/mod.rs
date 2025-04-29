@@ -34,6 +34,7 @@ pub mod tree {
         /**
          * Consumptive, this function can only be called once for the whole lifetime
          */
+        #[allow(dead_code)]
         fn get_nodelink(self) -> NodeLink {
             Rc::new(RefCell::new(self))
         }
@@ -88,6 +89,7 @@ pub mod tree {
         /**
          * Unused
          */
+        #[allow(dead_code)]
         fn is_node_match_weak_strong(node1: Option<WeakNodeLink>, node2: Option<NodeLink>) -> bool {
             let node1s: Option<Rc<RefCell<Node>>> = Node::upgrade_weak_to_strong(node1);
             if node1s.is_none() && node2.is_none() {
