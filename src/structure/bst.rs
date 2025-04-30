@@ -89,7 +89,7 @@ impl BstNode {
         }
         self.get_bst_nodelink_copy()
     }
-
+    #[allow(dead_code)]
     pub fn maximum(&self) -> BstNodeLink {
         if self.key.is_some() {
             if let Some(right_node) = &self.right {
@@ -118,26 +118,48 @@ impl BstNode {
     pub fn tree_successor(x_node: &BstNodeLink) -> Option<BstNodeLink> {
         // directly check if the node has a right child, otherwise go to the next block
         if let Some(right_node) = &x_node.borrow().right {
-            return Some(right_node.borrow().minimum());
+            println!("- the node {:?} has a right child", x_node.borrow().key);
+            println!("- then, take the right child as a subtree");
+
+            let minimum = Some(right_node.borrow().minimum());
+
+            println!("- the minimum key of that subtree is {:?}", minimum.clone().unwrap().borrow().key);
+
+            // return Some(right_node.borrow().minimum());
+            return minimum;
         } 
         
         // empty right child case
         else { 
+            println!("- the node {:?} does not have a right child", x_node.borrow().key);
+
             let mut x_node = x_node;
             let mut y_node = BstNode::upgrade_weak_to_strong(x_node.borrow().parent.clone());
             let mut temp: BstNodeLink;
 
             while let Some(ref exist) = y_node {
+                println!("- the node {:?} has parent of node {:?}", x_node.borrow().key, y_node.clone().unwrap().borrow().key);
+
                 if let Some(ref left_child) = exist.borrow().left {
+                    // println!("- the parent node {:?} has a left child", exist.borrow().key);
+
                     if BstNode::is_node_match(left_child, x_node) {
+                        println!("- and, the node {:?} is the left child", x_node.borrow().key);
                         return Some(exist.clone());
+                    }
+
+                    else {
+                        println!("- but, the node {:?} is the right child", x_node.borrow().key);
                     }
                 }
 
+                println!("- traverse upward now to the node {:?}", y_node.clone().unwrap().borrow().key);
                 temp = y_node.unwrap();
                 x_node = &temp;
                 y_node = BstNode::upgrade_weak_to_strong(temp.borrow().parent.clone());
             }
+
+            println!("- it does not have parent, the current node is root");
 
             None    
         }

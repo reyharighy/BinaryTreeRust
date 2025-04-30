@@ -87,29 +87,37 @@ fn test_binary_search_tree(){
     let root_node = BstNode::get_root(&max_node);
     println!("root node {:?}", root_node.borrow().key);
 
-    //successor test
-    let query_keys = vec![
-        2, // min_node, should return its parent Some(3)
-        20, // max_node, should return None
-        15, // root_node, should return the minimum of its right tree
-        // test case for node with empty right child
-        // should return a parent of the node's ancestor if it's a left child of the parent
-        13,
-        9, 7, // other keys
-        22 // non-existent key
-    ];
+    // //successor test
+    // let query_keys = vec![
+    //     2, // min_node, should return its parent Some(3)
+    //     20, // max_node, should return None
+    //     15, // root_node, should return the minimum of its right tree
+    //     // test case for node with empty right child
+    //     // should return a parent of the node's ancestor if it's a left child of the parent
+    //     13,
+    //     9, 7, // other keys
+    //     22 // non-existent key
+    // ];
 
-    for &key in query_keys.iter() {
+    // use line below to iterate over the query keys
+    // for &key in query_keys.iter() {
+    
+    // iterate to all values from 1 to 21, uncomment the line below if iterating using query_keys
+    for key in 1..=21 {
         if let Some(node) = rootlink.borrow().tree_search(&key) {
-            print!("successor of node ({}) is ", key);
+            println!("\n===== successor of node ({}) =====", key);
 
-            if let Some(successor) = BstNode::tree_successor_simpler(&node) {
-                println!("{:?}", successor.borrow().key);
+            // if let Some(successor) = BstNode::tree_successor_simpler(&node) {
+            if let Some(successor) = BstNode::tree_successor(&node) {
+                println!("===== so, the successor is {:?} =====", successor.borrow().key);
             } else {
-                println!("not found");
+                println!("===== so, the successor is not found =====");
             }
-        } else {
-            println!("node with key of {} does not exist, failed to get successor", key)
+        } 
+        
+        else {
+            // comment the line below to skip non-existent key, otherwise uncomment
+            // println!("node with key of {} does not exist, failed to get successor", key)
         }
     }
 }
