@@ -63,12 +63,12 @@ impl BstNode {
     }
 
     //search the current tree which node fit the value
-    pub fn tree_search(&self, value: i32) -> Option<BstNodeLink> {
+    pub fn tree_search(&self, value: &i32) -> Option<BstNodeLink> {
         if let Some(key) = self.key {
-            if key == value {
+            if key == *value {
                 return Some(self.get_bst_nodelink_copy());
             }
-            if value < key && self.left.is_some() {
+            if *value < key && self.left.is_some() {
                 return self.left.as_ref().unwrap().borrow().tree_search(value);
             } else if self.right.is_some() {
                 return self.right.as_ref().unwrap().borrow().tree_search(value);
@@ -111,6 +111,7 @@ impl BstNode {
     }
 
     /**
+     * NOTE: Buggy from pull request
      * Find node successor according to the book
      * Should return None, if x_node is the highest key in the tree
      */
@@ -143,15 +144,15 @@ impl BstNode {
     }
 
     /**
-     * Alternate simpler version of tree_successor that made us of is_nil checking
+     * Alternate simpler version of tree_successor that made use of is_nil checking
      */
     #[allow(dead_code)]
-    pub fn tree_successor_simpler(x_node: &BstNodeLink) -> BstNodeLink{
+    pub fn tree_successor_simpler(x_node: &BstNodeLink) -> Option<BstNodeLink>{
         //create a shadow of x_node so it can mutate
         let mut x_node = x_node;
         let right_node = &x_node.borrow().right.clone();
         if BstNode::is_nil(right_node)!=true{
-            return right_node.clone().unwrap().borrow().minimum();
+            return Some(right_node.clone().unwrap().borrow().minimum());
         }
 
         let mut y_node = BstNode::upgrade_weak_to_strong(x_node.borrow().parent.clone());
@@ -166,11 +167,11 @@ impl BstNode {
 
         //in case our sucessor traversal yield root, means self is the highest key
         if BstNode::is_node_match_option(y_node.clone(), Some(BstNode::get_root(&x_node))) {
-            return x_node.clone();
+            return None;
         }
 
         //default return self / x_node
-        y_node.clone().unwrap()
+        return Some(y_node.clone().unwrap())
     }
 
     /**

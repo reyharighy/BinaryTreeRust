@@ -67,14 +67,14 @@ fn test_binary_search_tree(){
 
     for &key in search_keys.iter() {
         print!("tree search result of key {} is ", key);
-        
-        if let Some(node_result) = rootlink.borrow().tree_search(key) {
+
+        if let Some(node_result) = rootlink.borrow().tree_search(&key) {
             println!("found -> {:?}", node_result.borrow().key);
         } else {
             println!("not found");
         }
     }
-    
+
     //min test
     let min_node = rootlink.borrow().minimum();
     println!("minimum result {:?}", min_node.borrow().key);
@@ -92,20 +92,18 @@ fn test_binary_search_tree(){
         2, // min_node, should return its parent Some(3)
         20, // max_node, should return None
         15, // root_node, should return the minimum of its right tree
-        
         // test case for node with empty right child
         // should return a parent of the node's ancestor if it's a left child of the parent
         13,
-
         9, 7, // other keys
         22 // non-existent key
     ];
 
     for &key in query_keys.iter() {
-        if let Some(node) = rootlink.borrow().tree_search(key) {
+        if let Some(node) = rootlink.borrow().tree_search(&key) {
             print!("successor of node ({}) is ", key);
 
-            if let Some(successor) = BstNode::tree_successor(&node) {
+            if let Some(successor) = BstNode::tree_successor_simpler(&node) {
                 println!("{:?}", successor.borrow().key);
             } else {
                 println!("not found");
