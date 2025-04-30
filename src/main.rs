@@ -10,7 +10,7 @@ use crate::tool::generate_dotfile_bst;
 
 fn main() {
     //turn on to test the old code
-    //test_binary_tree();
+    // test_binary_tree();
     test_binary_search_tree();
 }
 
@@ -51,9 +51,9 @@ fn test_binary_search_tree(){
         if let Some(second_right_subtree_link) = second_right_subtree{
             second_right_subtree_link.borrow_mut().add_right_child(second_right_subtree_link, 13);
 
-            let third_left_subtree = &second_right_subtree_link.borrow().left;
+            let third_left_subtree = &second_right_subtree_link.borrow().right;
             if let Some(third_left_subtree_link) = third_left_subtree{
-                third_left_subtree_link.borrow_mut().add_right_child(third_left_subtree_link, 9);
+                third_left_subtree_link.borrow_mut().add_left_child(third_left_subtree_link, 9);
             }
         }
     }
@@ -63,30 +63,60 @@ fn test_binary_search_tree(){
     generate_dotfile_bst(&rootlink, main_tree_path);
 
     //tree search test
-    let node_result = rootlink.borrow().tree_search(&3);
-    println!("tree search result {:?}", node_result);
+    let search_keys = vec![15, 9, 22];
+
+    for &key in search_keys.iter() {
+        print!("tree search result of key {} is ", key);
+        
+        if let Some(node_result) = rootlink.borrow().tree_search(key) {
+            println!("found -> {:?}", node_result.borrow().key);
+        } else {
+            println!("not found");
+        }
+    }
+    
     //min test
     let min_node = rootlink.borrow().minimum();
-    println!("minimum result {:?}", min_node);
+    println!("minimum result {:?}", min_node.borrow().key);
+
     //max test
     let max_node = rootlink.borrow().maximum();
-    println!("maximum result {:?}", max_node);
+    println!("maximum result {:?}", max_node.borrow().key);
+
     //root node get test
     let root_node = BstNode::get_root(&max_node);
-    println!();
-    println!("root node {:?}", root_node);
+    println!("root node {:?}", root_node.borrow().key);
 
     //successor test
-    let mut successor_node = BstNode::tree_successor(&root_node);
-    print!("Successor of node 15 is ");
-    println!("{:?}", successor_node);
+    let query_keys = vec![
+        2, // min_node, should return its parent Some(3)
+        20, // max_node, should return None
+        15, // root_node, should return the minimum of its right tree
+        
+        // test case for node with empty right child
+        // should return a parent of the node's ancestor if it's a left child of the parent
+        13,
 
-    successor_node = BstNode::tree_successor_simpler(&min_node);
-    print!("Successor of node 2 is ");
-    println!("{:?}", successor_node);
+        9, 7, // other keys
+        22 // non-existent key
+    ];
 
+    for &key in query_keys.iter() {
+        if let Some(node) = rootlink.borrow().tree_search(key) {
+            print!("successor of node ({}) is ", key);
+
+            if let Some(successor) = BstNode::tree_successor(&node) {
+                println!("{:?}", successor.borrow().key);
+            } else {
+                println!("not found");
+            }
+        } else {
+            println!("node with key of {} does not exist, failed to get successor", key)
+        }
+    }
 }
 
+#[allow(dead_code)]
 fn test_binary_tree() {
     //create the nodelink of the root node
     let rootlink: NodeLink = Node::new_nodelink(5);

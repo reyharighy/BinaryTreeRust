@@ -63,12 +63,12 @@ impl BstNode {
     }
 
     //search the current tree which node fit the value
-    pub fn tree_search(&self, value: &i32) -> Option<BstNodeLink> {
+    pub fn tree_search(&self, value: i32) -> Option<BstNodeLink> {
         if let Some(key) = self.key {
-            if key == *value {
+            if key == value {
                 return Some(self.get_bst_nodelink_copy());
             }
-            if *value < key && self.left.is_some() {
+            if value < key && self.left.is_some() {
                 return self.left.as_ref().unwrap().borrow().tree_search(value);
             } else if self.right.is_some() {
                 return self.right.as_ref().unwrap().borrow().tree_search(value);
@@ -112,43 +112,40 @@ impl BstNode {
 
     /**
      * Find node successor according to the book
-     * Possible to return self, if x_node is the highest key in the tree
+     * Should return None, if x_node is the highest key in the tree
      */
-    pub fn tree_successor(x_node: &BstNodeLink) -> BstNodeLink {
-        let mut x_node = x_node;
+    pub fn tree_successor(x_node: &BstNodeLink) -> Option<BstNodeLink> {
+        // directly check if the node has a right child, otherwise go to the next block
         if let Some(right_node) = &x_node.borrow().right {
-            return right_node.borrow().minimum();
-        }
-        let mut y_node = BstNode::upgrade_weak_to_strong(x_node.borrow_mut().parent.clone());
-        let mut y_node2: Rc<RefCell<BstNode>>;
-        while let Some(y_node_val) = y_node.clone() {
-            if let Some(next_right) = &y_node_val.borrow().right {
-                //meaning we are coming from the right, seek further up
-                if y_node_val.borrow().parent.is_some()
-                    && BstNode::is_node_match(x_node, next_right)
-                {
-                    y_node2 = y_node.clone().unwrap();
-                    x_node = &y_node2;
-                    let y_parent = y_node_val.borrow_mut().parent.clone().unwrap();
-                    y_node = Some(
-                        BstNode::upgrade_weak_to_strong(Some(y_parent))
-                            .clone()
-                            .unwrap(),
-                    );
+            return Some(right_node.borrow().minimum());
+        } 
+        
+        // empty right child case
+        else { 
+            let mut x_node = x_node;
+            let mut y_node = BstNode::upgrade_weak_to_strong(x_node.borrow().parent.clone());
+            let mut temp: BstNodeLink;
+
+            while let Some(ref exist) = y_node {
+                if let Some(ref left_child) = exist.borrow().left {
+                    if BstNode::is_node_match(left_child, x_node) {
+                        return Some(exist.clone());
+                    }
                 }
+
+                temp = y_node.unwrap();
+                x_node = &temp;
+                y_node = BstNode::upgrade_weak_to_strong(temp.borrow().parent.clone());
             }
+
+            None    
         }
-        //in case our sucessor traversal yield root, means self is the highest key
-        if BstNode::is_node_match_option(y_node.clone(), Some(BstNode::get_root(&x_node))) {
-            return x_node.clone();
-        }
-        //guaranteed y_node is parent of x since if root will be catched on previous block
-        return y_node.clone().unwrap();
     }
 
     /**
      * Alternate simpler version of tree_successor that made us of is_nil checking
      */
+    #[allow(dead_code)]
     pub fn tree_successor_simpler(x_node: &BstNodeLink) -> BstNodeLink{
         //create a shadow of x_node so it can mutate
         let mut x_node = x_node;
