@@ -1,14 +1,8 @@
-# binarysearchtree
+# Assignment 4: Binary Search Tree in Rust
 
-A binary tree structure implemented in Rust.
+The template for assignment been taken from our previous class discussion up to latest quiz. For the assignment you just need to add 3 functions:
+- tree_insert
+- transplant
+- tree_delete
 
-Core binary tree structure has been completed on structure module.
-
-The helper function to print the output of binary tree to dot graphviz notation also been completed.
-
-Tested functions:
-- add\_left\_child
-- add\_right\_child
-- tree\_depth
-- count\_nodes
-- count\_nodes\_by\_nodelink
+In the main.rs you need to prepare various cases to validate the correctness of your own implementation. 
