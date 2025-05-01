@@ -8,9 +8,18 @@ use crate::structure::bst::BstNodeLink;
 use crate::tool::generate_dotfile;
 use crate::tool::generate_dotfile_bst;
 
+// related to logger
+use env_logger::Builder;
+use std::io::Write;
+
 fn main() {
+    // turn on to use logger
+    customized_debug();
+
     //turn on to test the old code
-    // test_binary_tree();
+    //test_binary_tree();
+
+    // turn on to test BST module
     test_binary_search_tree();
 }
 
@@ -63,13 +72,13 @@ fn test_binary_search_tree(){
     generate_dotfile_bst(&rootlink, main_tree_path);
 
     //tree search test
-    let search_keys = vec![15, 9, 22];
+    let search_keys = vec![9, 21];
 
     for &key in search_keys.iter() {
-        print!("tree search result of key {} is ", key);
+        print!("tree search result of node with key of {} is ", key);
 
-        if let Some(node_result) = rootlink.borrow().tree_search(&key) {
-            println!("found -> {:?}", node_result.borrow().key);
+        if let Some(_node_result) = rootlink.borrow().tree_search(&key) {
+            println!("found");
         } else {
             println!("not found");
         }
@@ -77,41 +86,25 @@ fn test_binary_search_tree(){
 
     //min test
     let min_node = rootlink.borrow().minimum();
-    println!("minimum result {:?}", min_node.borrow().key);
+    println!("minimum node of the tree is {:?}", min_node.borrow().key);
 
     //max test
     let max_node = rootlink.borrow().maximum();
-    println!("maximum result {:?}", max_node.borrow().key);
+    println!("maximum node of the tree is {:?}", max_node.borrow().key);
 
     //root node get test
     let root_node = BstNode::get_root(&max_node);
-    println!("root node {:?}", root_node.borrow().key);
-
-    // //successor test
-    // let query_keys = vec![
-    //     2, // min_node, should return its parent Some(3)
-    //     20, // max_node, should return None
-    //     15, // root_node, should return the minimum of its right tree
-    //     // test case for node with empty right child
-    //     // should return a parent of the node's ancestor if it's a left child of the parent
-    //     13,
-    //     9, 7, // other keys
-    //     22 // non-existent key
-    // ];
-
-    // use line below to iterate over the query keys
-    // for &key in query_keys.iter() {
+    println!("root node of the tree is {:?}", root_node.borrow().key);
     
-    // iterate to all values from 1 to 21, uncomment the line below if iterating using query_keys
+    //successor test
     for key in 1..=21 {
         if let Some(node) = rootlink.borrow().tree_search(&key) {
-            println!("\n===== successor of node ({}) =====", key);
+            println!("\n================ successor of node ({}) =================", key);
 
-            // if let Some(successor) = BstNode::tree_successor_simpler(&node) {
             if let Some(successor) = BstNode::tree_successor(&node) {
-                println!("===== so, the successor is {:?} =====", successor.borrow().key);
+                println!("============= so, the successor is {:?} =============", successor.borrow().key);
             } else {
-                println!("===== so, the successor is not found =====");
+                println!("============ so, the successor is not found =============");
             }
         } 
         
@@ -120,6 +113,20 @@ fn test_binary_search_tree(){
             // println!("node with key of {} does not exist, failed to get successor", key)
         }
     }
+}
+
+#[allow(dead_code)]
+fn customized_debug() {
+    Builder::new()
+        .format(|buf, record| {
+            writeln!(
+                buf,
+                "{}",
+                record.args() // just the log message itself
+            )
+        })
+        .filter_level(log::LevelFilter::Debug)
+        .init();
 }
 
 #[allow(dead_code)]
