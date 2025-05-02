@@ -1,6 +1,6 @@
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
-use log::debug; // for logger
+use log::debug;
 
 pub type BstNodeLink = Rc<RefCell<BstNode>>;
 pub type WeakBstNodeLink = Weak<RefCell<BstNode>>;
@@ -45,7 +45,6 @@ impl BstNode {
     //private interface
     fn new_with_parent(parent: &BstNodeLink, value: i32) -> BstNodeLink {
         let mut currentnode = BstNode::new(value);
-        //currentnode.add_parent(Rc::<RefCell<BstNode>>::downgrade(parent));
         currentnode.parent = Some(BstNode::downgrade(parent));
         let currentlink = Rc::new(RefCell::new(currentnode));
         currentlink
@@ -57,7 +56,7 @@ impl BstNode {
         self.left = Some(new_node);
     }
 
-    //add new left child, set the parent to current_node_link
+    //add new right child, set the parent to current_node_link
     pub fn add_right_child(&mut self, current_node_link: &BstNodeLink, value: i32) {
         let new_node = BstNode::new_with_parent(current_node_link, value);
         self.right = Some(new_node);
@@ -119,41 +118,111 @@ impl BstNode {
     pub fn tree_successor(x_node: &BstNodeLink) -> Option<BstNodeLink> {
         if let Some(right_node) = &x_node.borrow().right {
             let minimum = Some(right_node.borrow().minimum());
+            let node = minimum.clone().unwrap().clone();
 
             debug!("- the node {:?} has a right child", x_node.borrow().key);
             debug!("- then, take the right child as a subtree");
-            debug!("- the minimum node of that subtree is {:?}", minimum.clone().unwrap().borrow().key);
+            debug!("- the minimum node of that subtree is {:?}", node.borrow().key);
+            debug!("============= so, the successor is {:?} =============", node.borrow().key);
 
             return minimum;
         } else { 
             debug!("- the node {:?} does not have a right child", x_node.borrow().key);
 
-            let mut x_node = x_node;
+            let mut x_node = x_node.clone();
             let mut y_node = BstNode::upgrade_weak_to_strong(x_node.borrow().parent.clone());
-            let mut temp: BstNodeLink;
 
-            while let Some(ref exist) = y_node {
-                debug!("- the node {:?} has a parent node {:?}", x_node.borrow().key, y_node.clone().unwrap().borrow().key);
+            while let Some(y_ref) = y_node {
+                debug!("- the node {:?} has a parent node {:?}", x_node.borrow().key, y_ref.borrow().key);
 
-                if let Some(ref left_child) = exist.borrow().left {
-                    if BstNode::is_node_match(left_child, x_node) {
+                if let Some(ref left_child) = y_ref.borrow().left {
+                    if BstNode::is_node_match(left_child, &x_node) {
                         debug!("- and, the node {:?} is the left child of that parent", x_node.borrow().key);
+                        debug!("============= so, the successor is {:?} =============", y_ref.clone().borrow().key);
 
-                        return Some(exist.clone());
+                        return Some(y_ref.clone());
                     }
                 }
 
                 debug!("- but, the node {:?} is the right child", x_node.borrow().key);
-                debug!("- traverse upward now to the node {:?}", y_node.clone().unwrap().borrow().key);
+                debug!("- traverse upward now to the node {:?}", y_ref.borrow().key);
 
-                temp = y_node.unwrap();
-                x_node = &temp;
-                y_node = BstNode::upgrade_weak_to_strong(temp.borrow().parent.clone());
+                x_node = y_ref.clone();
+                y_node = BstNode::upgrade_weak_to_strong(y_ref.borrow().parent.clone());
             }
 
             debug!("- the node {:?} does not have a parent, it's the root", x_node.borrow().key);
+            debug!("============ so, the successor is not found =============");
             None    
         }
+    }
+
+    pub fn tree_insert(&mut self, rootlink: &BstNodeLink, value: &i32) {
+        debug!("\n=========== insert a new node with value of {value} ===========");
+
+        let mut current_node;
+        let mut y_node: BstNodeLink;
+        let mut x_node = BstNode::get_root(&self.get_bst_nodelink_copy());
+        let new_node = BstNode::new(*value);
+
+        debug!("- start traverse from the root node {:?}", x_node.clone().borrow().key);
+
+        while let Some(exist) = x_node.clone().borrow().key {
+            y_node = BstNode::tree_search(&self, &exist).unwrap();
+            current_node = y_node.clone();
+
+            if *value < exist {
+                debug!("- {value} is less than the value of node {:?}", y_node.borrow().key);
+
+                if let Some(left) = y_node.borrow().left.clone() {
+                    let left_node = current_node.borrow().left.clone().unwrap().borrow().key;
+                    x_node = left;
+
+                    debug!("- the node {:?} has a left child with value {:?}", current_node.borrow().key, left_node);
+                    debug!("- traverse down to the node {:?}", left_node);
+                } else {
+                    debug!("- the node {:?} does not have a left child", y_node.borrow().key);
+                    debug!("- found the insert point for the new node");
+
+                    break;
+                }
+            } else {
+                debug!("- {value} is greater than the value of node {:?}", y_node.borrow().key);
+
+                if let Some(right) = y_node.borrow().right.clone() {
+                    let right_node = current_node.borrow().right.clone().unwrap().borrow().key;
+                    x_node = right;
+
+                    debug!("- the node {:?} has a right child with value {:?}", current_node.borrow().key, right_node);
+                    debug!("- traverse down to the node {:?}", right_node);
+                } else {
+                    debug!("- the node {:?} does not have a right child", y_node.borrow().key);
+                    debug!("- found the insert point for the new node");
+
+                    break;
+                }
+            }
+        }
+
+        if new_node.key < x_node.borrow().key {
+            if let Some(_) = self.left.clone() {
+                x_node.borrow_mut().add_left_child(&x_node, new_node.key.unwrap());
+            } else {
+                self.left = Some(BstNode::new_with_parent(rootlink, new_node.key.unwrap()));
+            }
+
+            debug!("- insert the node {:?} as the left child", new_node.key);
+        } else {
+            if let Some(_) = self.right.clone() {
+                x_node.borrow_mut().add_right_child(&x_node, new_node.key.unwrap());
+            } else {
+                self.right = Some(BstNode::new_with_parent(rootlink, new_node.key.unwrap()));
+            }
+
+            debug!("- insert the node {:?} as the right child", new_node.key);
+        }
+
+        debug!("================= insertion is complete =================");
     }
 
     /**
@@ -229,7 +298,7 @@ impl BstNode {
     fn upgrade_weak_to_strong(node: Option<WeakBstNodeLink>) -> Option<BstNodeLink> {
         match node {
             None => None,
-            Some(x) => Some(x.upgrade().unwrap()),
+            Some(x) => Some(x.upgrade()).unwrap(),
         }
     }
 }

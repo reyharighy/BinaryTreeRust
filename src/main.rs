@@ -13,16 +13,50 @@ use env_logger::Builder;
 use std::io::Write;
 
 fn main() {
-    // turn on to use logger
-    customized_debug();
-
     //turn on to test the old code
     //test_binary_tree();
 
     // turn on to test BST module
-    test_binary_search_tree();
+    // test_binary_search_tree();
+
+    // turn on to use logger
+    customized_debug();
+
+    test_binary_search_tree_new_assignment();
 }
 
+fn test_binary_search_tree_new_assignment() {
+    // insert each value in a way as aligned in the textbook
+    let rootlink: BstNodeLink = BstNode::new_bst_nodelink(15);
+
+    for key in vec![6, 18, 3, 7, 17, 20, 2, 4, 13, 9] {
+        rootlink.borrow_mut().tree_insert(&rootlink, &key);    
+    }
+
+    // print the tree at this time
+    let main_tree_path = "bst_graph.dot";
+    generate_dotfile_bst(&rootlink, main_tree_path);
+
+    // root, min, and max test
+    println!("\n================= root, min, and max ===================");
+    println!("- root node is {:?}", BstNode::get_root(&rootlink).borrow().key);
+    println!("- minimum node is {:?}", rootlink.borrow().minimum().borrow().key);
+    println!("- maximum node is {:?}", rootlink.borrow().maximum().borrow().key);
+    println!("========================================================");
+
+    // successor test
+    for key in 1..=21 {
+        if let Some(node) = rootlink.borrow().tree_search(&key) {
+            println!("\n================ successor of node ({}) =================", key);
+            BstNode::tree_successor(&node);
+        } else {
+            // comment the line below to skip non-existent key, otherwise uncomment
+            // println!("\nnode with key of {} does not exist, failed to get successor", key);
+        }
+    }
+}
+
+#[allow(dead_code)]
 fn test_binary_search_tree(){
     let rootlink: BstNodeLink = BstNode::new_bst_nodelink(15);
     rootlink.borrow_mut().add_left_child(&rootlink, 6);
@@ -95,7 +129,7 @@ fn test_binary_search_tree(){
     //root node get test
     let root_node = BstNode::get_root(&max_node);
     println!("root node of the tree is {:?}", root_node.borrow().key);
-    
+
     //successor test
     for key in 1..=21 {
         if let Some(node) = rootlink.borrow().tree_search(&key) {
@@ -106,11 +140,11 @@ fn test_binary_search_tree(){
             } else {
                 println!("============ so, the successor is not found =============");
             }
-        } 
-        
+        }
+
         else {
             // comment the line below to skip non-existent key, otherwise uncomment
-            // println!("node with key of {} does not exist, failed to get successor", key)
+            // println!("node with key of {} does not exist, failed to get successor", key);
         }
     }
 }
