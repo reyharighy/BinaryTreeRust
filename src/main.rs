@@ -26,12 +26,45 @@ fn main() {
 }
 
 fn test_binary_search_tree_new_assignment() {
-    // insert each value in a way as aligned in the textbook
-    let rootlink: BstNodeLink = BstNode::new_bst_nodelink(15);
+    let rootlink= BstNode::new_bst_nodelink(15);
 
-    for key in vec![6, 18, 3, 7, 17, 20, 2, 4, 13, 9] {
-        rootlink.borrow_mut().tree_insert(&rootlink, &key);    
+    // insert each value to the root sequentially
+    let query_keys = vec![
+        5, 18, 
+        3, 7, 17, 20, 
+        2, 4, 6, 10, 16, 19, 
+        1, 8, 11, 
+        9, 13, 
+        12, 14,
+        25, 24, 23, 22, 21
+    ];
+
+    for key in query_keys {
+        rootlink.borrow_mut().tree_insert(&rootlink, &key);
     }
+
+    // PASSED
+    for key in vec![1, 4, 6, 9, 12, 14, 16, 19, 21] {
+        rootlink.borrow_mut().tree_delete(&key);
+    }
+
+    // PASSED
+    for key in vec![2, 8, 11, 17, 22, 23, 24, 25] {
+        rootlink.borrow_mut().tree_delete(&key);
+    }
+
+    // PASSED
+    for key in vec![3, 10, 13] {
+        rootlink.borrow_mut().tree_delete(&key);
+    }
+
+    // PASSED
+    for key in vec![5, 7, 18, 20] {
+        rootlink.borrow_mut().tree_delete(&key);
+    }
+
+    // PASSED
+    rootlink.borrow_mut().tree_delete(&15);
 
     // print the tree at this time
     let main_tree_path = "bst_graph.dot";
@@ -45,13 +78,12 @@ fn test_binary_search_tree_new_assignment() {
     println!("========================================================");
 
     // successor test
-    for key in 1..=21 {
+    for key in 1..=25 {
         if let Some(node) = rootlink.borrow().tree_search(&key) {
-            println!("\n================ successor of node ({}) =================", key);
             BstNode::tree_successor(&node);
         } else {
             // comment the line below to skip non-existent key, otherwise uncomment
-            // println!("\nnode with key of {} does not exist, failed to get successor", key);
+            println!("\nnode with key of {} does not exist, failed to get successor", key);
         }
     }
 }
@@ -144,7 +176,7 @@ fn test_binary_search_tree(){
 
         else {
             // comment the line below to skip non-existent key, otherwise uncomment
-            // println!("node with key of {} does not exist, failed to get successor", key);
+            println!("node with key of {} does not exist, failed to get successor", key);
         }
     }
 }

@@ -89,7 +89,7 @@ impl BstNode {
         }
         self.get_bst_nodelink_copy()
     }
-    
+
     pub fn maximum(&self) -> BstNodeLink {
         if self.key.is_some() {
             if let Some(right_node) = &self.right {
@@ -111,11 +111,12 @@ impl BstNode {
     }
 
     /**
-     * NOTE: Buggy from pull request
      * Find node successor according to the book
      * Should return None, if x_node is the highest key in the tree
      */
     pub fn tree_successor(x_node: &BstNodeLink) -> Option<BstNodeLink> {
+        debug!("\n============== successor of node {:?} ===============", x_node.borrow().key);
+
         if let Some(right_node) = &x_node.borrow().right {
             let minimum = Some(right_node.borrow().minimum());
             let node = minimum.clone().unwrap().clone();
@@ -126,7 +127,7 @@ impl BstNode {
             debug!("============= so, the successor is {:?} =============", node.borrow().key);
 
             return minimum;
-        } else { 
+        } else {
             debug!("- the node {:?} does not have a right child", x_node.borrow().key);
 
             let mut x_node = x_node.clone();
@@ -223,6 +224,125 @@ impl BstNode {
         }
 
         debug!("================= insertion is complete =================");
+    }
+
+    pub fn tree_delete(&mut self, value: &i32) {
+        if let Some(replaced) = self.tree_search(value) { 
+            if BstNode::is_node_match(&replaced, &self.get_bst_nodelink_copy()) {
+                self.transplant(&self.get_bst_nodelink_copy(), &replaced, BstNode::tree_successor(&replaced));
+            }
+
+            else {
+                self.tree_pointer(&replaced);
+            }
+        }
+
+        else { println!("no such key, failed to delete"); }
+    }
+
+    fn tree_pointer(&mut self, replaced: &BstNodeLink) {
+        if replaced.borrow().key.unwrap() < self.key.unwrap() {
+            if !BstNode::is_node_match(&self.left.clone().unwrap(), replaced) {
+                self.left.as_ref().unwrap().borrow_mut().tree_pointer(replaced);
+            }
+
+            else { self.delete("left"); }
+        }
+
+        else {
+            if !BstNode::is_node_match(&self.right.clone().unwrap(), replaced) {
+                self.right.as_ref().unwrap().borrow_mut().tree_pointer(replaced);   
+            }
+
+            else { self.delete("right"); }
+        }
+    }
+
+    fn delete(&mut self, entry_point: &str) {
+        let replaced: Option<BstNodeLink>;
+
+        if entry_point == "left" { replaced = self.left.clone(); } 
+        else { replaced = self.right.clone(); }
+
+        if let Some(replaced) = replaced {
+            if replaced.borrow().left.is_none() && replaced.borrow().right.is_none() {
+                self.transplant(&replaced, &replaced, None);
+            } else if replaced.borrow().left.is_none() {
+                self.transplant(&replaced, &replaced, replaced.borrow().right.clone());
+            } else if replaced.borrow().right.is_none() {
+                self.transplant(&replaced, &replaced, replaced.borrow().left.clone());
+            } else {
+                let successor = BstNode::tree_successor(&replaced);
+                let successor_parent = BstNode::upgrade_weak_to_strong(successor.clone().unwrap().borrow().parent.clone());
+
+                if BstNode::is_node_match(&successor_parent.unwrap(), &replaced) {
+                    self.transplant(&replaced, &replaced, successor.clone());
+                    let right_successor = successor.as_ref().unwrap().borrow().right.clone();
+
+                    if right_successor.is_some() {
+                        right_successor.as_ref().unwrap().borrow_mut().parent = Some(BstNode::downgrade(&successor.clone().unwrap()));
+                    }
+                } else {
+                    self.transplant(&replaced, &successor.clone().unwrap(), successor.as_ref().unwrap().borrow().right.clone());
+
+                    if BstNode::is_node_match(&self.left.clone().unwrap(), &replaced) {
+                        replaced.borrow_mut().key = successor.clone().unwrap().borrow().key;
+                    }
+
+                    if BstNode::is_node_match(&self.right.clone().unwrap(), &replaced) {
+                        replaced.borrow_mut().key = successor.clone().unwrap().borrow().key;
+                    }
+                }
+            }
+        }
+    }
+
+    fn transplant(&mut self, reference: &BstNodeLink, replaced: &BstNodeLink, replacement: Option<BstNodeLink>) {
+        if let Some(ref replacement) = replacement {
+            replacement.borrow_mut().parent = replaced.borrow().parent.clone();
+        }
+
+        if replaced.borrow().parent.is_none() {
+            if let Some(_) = replacement.clone() {
+                self.tree_pointer(&replacement.clone().unwrap());
+                self.key = replacement.clone().unwrap().borrow().key;   
+            }
+        }
+
+        else if replaced.borrow().left.is_some() && replaced.borrow().right.is_some() {
+            replacement.as_ref().unwrap().borrow_mut().left = reference.borrow().left.clone();
+            replacement.as_ref().unwrap().borrow_mut().left.as_ref().unwrap().borrow_mut().parent = Some(BstNode::downgrade(&replacement.clone().unwrap()));
+
+            if let Some(_) = self.left.clone() {
+                if BstNode::is_node_match(&self.left.clone().unwrap(), reference) {
+                    self.left = replacement.clone();
+                }   
+            }
+
+            if let Some(_) = self.right.clone() {
+                if BstNode::is_node_match(&self.right.clone().unwrap(), reference) {
+                    self.right = replacement.clone();
+                }
+            }
+        } 
+        
+        else {
+            if let Some(_) = self.left.clone() {
+                if BstNode::is_node_match(&self.left.clone().unwrap(), replaced) {
+                    self.left = replacement.clone();
+                }   
+            }
+
+            if let Some(_) = self.right.clone() {
+                if BstNode::is_node_match(&self.right.clone().unwrap(), replaced) {
+                    self.right = replacement.clone();
+                }
+            }
+
+            if !BstNode::is_node_match(replaced, reference) {
+                self.tree_pointer(replaced);
+            }
+        }
     }
 
     /**
