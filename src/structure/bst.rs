@@ -206,24 +206,24 @@ impl BstNode {
         }
 
         if new_node.key < x_node.borrow().key {
-            if let Some(_) = self.left.clone() {
-                x_node.borrow_mut().add_left_child(&x_node, new_node.key.unwrap());
-            } else {
+            if BstNode::is_node_match(&x_node, &self.get_bst_nodelink_copy()) {
                 self.left = Some(BstNode::new_with_parent(rootlink, new_node.key.unwrap()));
+            } else {
+                x_node.borrow_mut().add_left_child(&x_node, new_node.key.unwrap());
             }
 
             debug!("- Insert the node {:?} as the left child", new_node.key);
         } else {
-            if let Some(_) = self.right.clone() {
-                x_node.borrow_mut().add_right_child(&x_node, new_node.key.unwrap());
-            } else {
+            if BstNode::is_node_match(&x_node, &self.get_bst_nodelink_copy()) {
                 self.right = Some(BstNode::new_with_parent(rootlink, new_node.key.unwrap()));
+            } else {
+                x_node.borrow_mut().add_right_child(&x_node, new_node.key.unwrap());
             }
 
             debug!("- Insert the node {:?} as the right child", new_node.key);
         }
 
-        debug!("- Insertion is complete");
+        debug!("- Insertion is complete\n");
     }
 
     pub fn tree_delete(&mut self, value: &i32) {
@@ -234,11 +234,21 @@ impl BstNode {
                 debug!("- The node {:?} is the root of the tree", replaced.clone().borrow().key);
                 debug!("- Set a pointer from the root node");
 
-                let successor = BstNode::tree_successor(&replaced);
+                if let Some(successor) = BstNode::tree_successor(&replaced) {
+                    debug!("- Change the node {:?} with a copy of node {:?}", replaced.clone().borrow().key, successor.clone().borrow().key);
+                    
+                    self.transplant(&self.get_bst_nodelink_copy(), &replaced, Some(successor));
+                } else {
+                    *self = BstNode::new(replaced.borrow().left.clone().unwrap().borrow().key.unwrap());
 
-                debug!("- Change the node {:?} with a copy of node {:?}", replaced.clone().borrow().key, successor.clone().unwrap().borrow().key);
+                    if let Some(left) = replaced.borrow().left.clone().unwrap().borrow().left.clone() {
+                        self.left = Some(left);
+                    }
 
-                self.transplant(&self.get_bst_nodelink_copy(), &replaced, successor);
+                    if let Some(right) = replaced.borrow().left.clone().unwrap().borrow().right.clone() {
+                        self.right = Some(right);
+                    }
+                }
             }
 
             else {

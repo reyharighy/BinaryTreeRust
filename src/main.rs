@@ -10,8 +10,11 @@ use crate::tool::generate_dotfile_bst;
 
 // related to logger
 use env_logger::Builder;
+use std::fs;
 use std::io;
 use std::io::Write;
+use std::path::Path;
+use std::process::Command;
 
 fn main() {
     //turn on to test the old code
@@ -71,13 +74,13 @@ fn test_binary_search_tree_new_assignment() {
                     println!("      6. Find the maximum node of the tree");
                     println!("      7. Save the current graph");
                     println!("      8. Exit the program");
-            
+
                     let mut input = String::new();
-            
+
                     io::stdin()
                         .read_line(&mut input)
                         .expect("    - Error: Failed to read input");
-            
+
                     value = match input.trim().parse() {
                         Ok(num) => num,
                         Err(_) => {
@@ -85,19 +88,19 @@ fn test_binary_search_tree_new_assignment() {
                             continue;
                         },
                     };
-            
+
                     match value {
                         1 => {
                             loop {
                                 println!("\n============================================ Insert ============================================\n");
                                 println!("    - Instruction: Please enter a key value of the new node");
-            
+
                                 let mut input = String::new();
-            
+
                                 io::stdin()
                                     .read_line(&mut input)
                                     .expect("    - Error: Failed to read input");
-            
+
                                 value = match input.trim().parse() {
                                     Ok(num) => num,
                                     Err(_) => {
@@ -105,11 +108,11 @@ fn test_binary_search_tree_new_assignment() {
                                         continue;
                                     },
                                 };
-            
+
                                 println!("\n============================================= Info =============================================\n");
-            
+
                                 let existed = rootlink.clone().borrow().tree_search(&value);
-            
+
                                 if let Some(exist) = existed {
                                     println!("    - Unable to insert the key value of {}", value);
                                     println!("    - The node {:?} already existed", exist.clone().borrow().key);
@@ -118,25 +121,25 @@ fn test_binary_search_tree_new_assignment() {
                                         .borrow_mut()
                                         .tree_insert(&rootlink, &value);
                                 }
-                                
+
                                 println!("\n================================================================================================\n");
-            
+
                                 break;
                             }
-            
+
                             continue;
                         },
                         2 => {
                             loop {
                                 println!("\n============================================ Delete ============================================\n");
                                 println!("    - Instruction: Please enter a key value of the node to delete");
-            
+
                                 let mut input = String::new();
-            
+
                                 io::stdin()
                                     .read_line(&mut input)
                                     .expect("    - Error: Failed to read input");
-            
+
                                 value = match input.trim().parse() {
                                     Ok(num) => num,
                                     Err(_) => {
@@ -144,31 +147,31 @@ fn test_binary_search_tree_new_assignment() {
                                         continue;
                                     },
                                 };
-            
+
                                 println!("\n============================================= Info =============================================\n");
-            
+
                                 rootlink
                                     .borrow_mut()
                                     .tree_delete(&value);
-            
+
                                 println!("\n================================================================================================\n");
-            
+
                                 break;
                             }
-            
+
                             continue;
                         },
                         3 => {
                             loop {
                                 println!("\n====================================== Find the successor ======================================\n");
                                 println!("    - Instruction: Please enter a key value of the node in order to find its successor");
-            
+
                                 let mut input = String::new();
-            
+
                                 io::stdin()
                                     .read_line(&mut input)
                                     .expect("    - Error: Failed to read input");
-            
+
                                 value = match input.trim().parse() {
                                     Ok(num) => num,
                                     Err(_) => {
@@ -176,52 +179,118 @@ fn test_binary_search_tree_new_assignment() {
                                         continue;
                                     },
                                 };
-            
+
                                 println!("\n============================================= Info =============================================\n");
-            
+
                                 if let Some(node) = rootlink.borrow().tree_search(&value) {
                                     BstNode::tree_successor(&node);
                                 } else {
                                     println!("    - Node with key of {} does not exist, failed to get successor", value);
                                 }
-            
+
                                 println!("\n================================================================================================\n");
-            
+
                                 break;
                             }
-            
+
                             continue;
                         },
                         4 => {
                             println!("\n============================================= Info =============================================\n");
                             println!("    - The root node of the tree is {:?}", BstNode::get_root(&rootlink).borrow().key);
                             println!("\n================================================================================================\n");
-            
+
                             continue;
                         },
                         5 => {
                             println!("\n============================================= Info =============================================\n");
                             println!("    - The minimum node of the tree is {:?}", rootlink.borrow().minimum().borrow().key);
                             println!("\n================================================================================================\n");
-                            
+
                             continue;
                         },
                         6 => {
                             println!("\n============================================= Info =============================================\n");
                             println!("    - The maximum node of the tree is {:?}", rootlink.borrow().maximum().borrow().key);
                             println!("\n================================================================================================\n");
-                            
+
                             continue;
                         },
                         7 => {
-                            println!("\n============================================= Info =============================================\n");
-            
-                            let main_tree_path = "bst_graph.dot";
-                            generate_dotfile_bst(&rootlink, main_tree_path);
-            
-                            println!("    - The graph has been written to the file named with {:?}", main_tree_path);
-                            println!("\n================================================================================================\n");
-                            
+                            println!("    - Instruction: Please define a name for file, along with the extension, for example 'example.dot'");
+
+                            let output_dir = Path::new("graph");
+                            let _ = fs::create_dir_all(output_dir);
+
+                            loop {
+                                let mut dot_path = String::new();
+
+                                io::stdin()
+                                    .read_line(&mut dot_path)
+                                    .expect("    - Error: Failed to read input");
+
+                                let dot_path = dot_path.trim();
+
+                                if dot_path.is_empty() {
+                                    println!("    - Error: Filename cannot be empty");
+
+                                    continue;
+                                }
+
+                                if !dot_path.ends_with(".dot") {
+                                    println!("    - Error: Filename must end with .dot");
+
+                                    continue;
+                                }
+
+                                if dot_path.contains(' ') {
+                                    println!("    - Error: Use underscores instead of spaces");
+
+                                    continue;
+                                }
+
+                                if !dot_path.chars().all(|c| 
+                                    c.is_ascii_lowercase() || 
+                                    c.is_numeric() || 
+                                    c == '_' || 
+                                    c == '.'
+                                ) {
+                                    println!("    - Error: Use only lowercase letters, numbers, and underscores");
+
+                                    continue;
+                                }
+
+                                let dot_full_path = output_dir.join(&dot_path);
+                                let png_full_path = output_dir.join(&dot_path.replace(".dot", ".png"));
+
+                                println!("\n============================================= Info =============================================\n");
+                                generate_dotfile_bst(&rootlink, dot_full_path.to_str().unwrap());
+                                println!("    - The graph has been written to {}", dot_full_path.display());
+
+                                match Command::new("dot")
+                                    .arg("-Tpng")
+                                    .arg(dot_full_path)
+                                    .arg("-o")
+                                    .arg(&png_full_path)
+                                    .output() 
+                                {
+                                    Ok(output) => {
+                                        if output.status.success() {
+                                            println!("    - Successfully converted to PNG: {}", png_full_path.display());
+                                        } else {
+                                            println!("    - {}", String::from_utf8_lossy(&output.stderr));
+                                        }
+                                    },
+                                    Err(_) => {
+                                        println!("    - Error: Failed to execute Graphviz");
+                                    }
+                                }
+
+                                println!("\n================================================================================================\n");
+
+                                break;
+                            }
+
                             continue;
                         },
                         8 => {
@@ -229,10 +298,11 @@ fn test_binary_search_tree_new_assignment() {
                         }
                         _ => {
                             println!("    - Error: Invalid input, there's no option number {}", value);
+
                             continue;
                         }
                     }
-            
+
                     break;
                 }
             },
@@ -241,11 +311,11 @@ fn test_binary_search_tree_new_assignment() {
 
                 loop {
                     let mut input = String::new();
-            
+
                     io::stdin()
                         .read_line(&mut input)
                         .expect("    - Error: Failed to read input");
-            
+
                     value = match input.trim().parse() {
                         Ok(num) => num,
                         Err(_) => {
@@ -253,12 +323,12 @@ fn test_binary_search_tree_new_assignment() {
                             continue;
                         },
                     };
-            
+
                     break;
                 }
-            
+
                 let rootlink= BstNode::new_bst_nodelink(value);
-            
+
                 println!("\n============================================= Info =============================================\n");
                 println!("    - The tree root with value {:?} is created successfully", rootlink.borrow().key);
                 println!("\n================================================================================================\n");
@@ -274,13 +344,13 @@ fn test_binary_search_tree_new_assignment() {
                     println!("      6. Find the maximum node of the tree");
                     println!("      7. Save the current graph");
                     println!("      8. Exit the program");
-            
+
                     let mut input = String::new();
-            
+
                     io::stdin()
                         .read_line(&mut input)
                         .expect("    - Error: Failed to read input");
-            
+
                     value = match input.trim().parse() {
                         Ok(num) => num,
                         Err(_) => {
@@ -288,19 +358,19 @@ fn test_binary_search_tree_new_assignment() {
                             continue;
                         },
                     };
-            
+
                     match value {
                         1 => {
                             loop {
                                 println!("\n============================================ Insert ============================================\n");
                                 println!("    - Instruction: Please enter a key value of the new node");
-            
+
                                 let mut input = String::new();
-            
+
                                 io::stdin()
                                     .read_line(&mut input)
                                     .expect("    - Error: Failed to read input");
-            
+
                                 value = match input.trim().parse() {
                                     Ok(num) => num,
                                     Err(_) => {
@@ -308,11 +378,11 @@ fn test_binary_search_tree_new_assignment() {
                                         continue;
                                     },
                                 };
-            
+
                                 println!("\n============================================= Info =============================================\n");
-            
+
                                 let existed = rootlink.clone().borrow().tree_search(&value);
-            
+
                                 if let Some(exist) = existed {
                                     println!("    - Unable to insert the key value of {}", value);
                                     println!("    - The node {:?} already existed", exist.clone().borrow().key);
@@ -321,25 +391,25 @@ fn test_binary_search_tree_new_assignment() {
                                         .borrow_mut()
                                         .tree_insert(&rootlink, &value);
                                 }
-                                
+
                                 println!("\n================================================================================================\n");
-            
+
                                 break;
                             }
-            
+
                             continue;
                         },
                         2 => {
                             loop {
                                 println!("\n============================================ Delete ============================================\n");
                                 println!("    - Instruction: Please enter a key value of the node to delete");
-            
+
                                 let mut input = String::new();
-            
+
                                 io::stdin()
                                     .read_line(&mut input)
                                     .expect("    - Error: Failed to read input");
-            
+
                                 value = match input.trim().parse() {
                                     Ok(num) => num,
                                     Err(_) => {
@@ -347,31 +417,31 @@ fn test_binary_search_tree_new_assignment() {
                                         continue;
                                     },
                                 };
-            
+
                                 println!("\n============================================= Info =============================================\n");
-            
+
                                 rootlink
                                     .borrow_mut()
                                     .tree_delete(&value);
-            
+
                                 println!("\n================================================================================================\n");
-            
+
                                 break;
                             }
-            
+
                             continue;
                         },
                         3 => {
                             loop {
                                 println!("\n====================================== Find the successor ======================================\n");
                                 println!("    - Instruction: Please enter a key value of the node in order to find its successor");
-            
+
                                 let mut input = String::new();
-            
+
                                 io::stdin()
                                     .read_line(&mut input)
                                     .expect("    - Error: Failed to read input");
-            
+
                                 value = match input.trim().parse() {
                                     Ok(num) => num,
                                     Err(_) => {
@@ -379,52 +449,118 @@ fn test_binary_search_tree_new_assignment() {
                                         continue;
                                     },
                                 };
-            
+
                                 println!("\n============================================= Info =============================================\n");
-            
+
                                 if let Some(node) = rootlink.borrow().tree_search(&value) {
                                     BstNode::tree_successor(&node);
                                 } else {
                                     println!("    - Node with key of {} does not exist, failed to get successor", value);
                                 }
-            
+
                                 println!("\n================================================================================================\n");
-            
+
                                 break;
                             }
-            
+
                             continue;
                         },
                         4 => {
                             println!("\n============================================= Info =============================================\n");
                             println!("    - The root node of the tree is {:?}", BstNode::get_root(&rootlink).borrow().key);
                             println!("\n================================================================================================\n");
-            
+
                             continue;
                         },
                         5 => {
                             println!("\n============================================= Info =============================================\n");
                             println!("    - The minimum node of the tree is {:?}", rootlink.borrow().minimum().borrow().key);
                             println!("\n================================================================================================\n");
-                            
+
                             continue;
                         },
                         6 => {
                             println!("\n============================================= Info =============================================\n");
                             println!("    - The maximum node of the tree is {:?}", rootlink.borrow().maximum().borrow().key);
                             println!("\n================================================================================================\n");
-                            
+
                             continue;
                         },
                         7 => {
-                            println!("\n============================================= Info =============================================\n");
-            
-                            let main_tree_path = "bst_graph.dot";
-                            generate_dotfile_bst(&rootlink, main_tree_path);
-            
-                            println!("    - The graph has been written to the file named with {:?}", main_tree_path);
-                            println!("\n================================================================================================\n");
-                            
+                            println!("    - Instruction: Please define a name for file, along with the extension, for example 'example.dot'");
+
+                            let output_dir = Path::new("graph");
+                            let _ = fs::create_dir_all(output_dir);
+
+                            loop {
+                                let mut dot_path = String::new();
+
+                                io::stdin()
+                                    .read_line(&mut dot_path)
+                                    .expect("    - Error: Failed to read input");
+
+                                let dot_path = dot_path.trim();
+
+                                if dot_path.is_empty() {
+                                    println!("    - Error: Filename cannot be empty");
+
+                                    continue;
+                                }
+
+                                if !dot_path.ends_with(".dot") {
+                                    println!("    - Error: Filename must end with .dot");
+
+                                    continue;
+                                }
+
+                                if dot_path.contains(' ') {
+                                    println!("    - Error: Use underscores instead of spaces");
+
+                                    continue;
+                                }
+
+                                if !dot_path.chars().all(|c| 
+                                    c.is_ascii_lowercase() || 
+                                    c.is_numeric() || 
+                                    c == '_' || 
+                                    c == '.'
+                                ) {
+                                    println!("    - Error: Use only lowercase letters, numbers, and underscores");
+
+                                    continue;
+                                }
+
+                                let dot_full_path = output_dir.join(&dot_path);
+                                let png_full_path = output_dir.join(&dot_path.replace(".dot", ".png"));
+
+                                println!("\n============================================= Info =============================================\n");
+                                generate_dotfile_bst(&rootlink, dot_full_path.to_str().unwrap());
+                                println!("    - The graph has been written to {}", dot_full_path.display());
+
+                                match Command::new("dot")
+                                    .arg("-Tpng")
+                                    .arg(dot_full_path)
+                                    .arg("-o")
+                                    .arg(&png_full_path)
+                                    .output() 
+                                {
+                                    Ok(output) => {
+                                        if output.status.success() {
+                                            println!("    - Successfully converted to PNG: {}", png_full_path.display());
+                                        } else {
+                                            println!("    - {}", String::from_utf8_lossy(&output.stderr));
+                                        }
+                                    },
+                                    Err(_) => {
+                                        println!("    - Error: Failed to execute Graphviz");
+                                    }
+                                }
+
+                                println!("\n================================================================================================\n");
+
+                                break;
+                            }
+
                             continue;
                         },
                         8 => {
@@ -435,7 +571,7 @@ fn test_binary_search_tree_new_assignment() {
                             continue;
                         }
                     }
-            
+
                     break;
                 }
             },
