@@ -70,7 +70,7 @@ src/
 
 ## Predefined Graph
 
-![Prefefined Graph](./graph/bst_graph.png)
+![Prefefined Graph](./graph/predefined_graph.png)
 
 The predefined graph provided as shown in the image above serves as an excellent initial test, offering a constructed binary search tree that systematically exercises various deletion scenarios across different tree depths and node configurations.
 
